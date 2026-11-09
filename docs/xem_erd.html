@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sơ Đồ ERD Chuỗi Cafe (Chuẩn 1 - N và N - N)</title>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/svg-pan-zoom@3.6.1/dist/svg-pan-zoom.min.js"></script>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      margin: 0; padding: 0;
+      background: #f8fafc;
+      color: #0f172a;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    header {
+      background: #1e293b;
+      color: white;
+      padding: 10px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      z-index: 100;
+    }
+    h1 { margin: 0; font-size: 1.15rem; font-weight: 600; }
+    .badge {
+      background: #2563eb;
+      color: white;
+      font-size: 0.75rem;
+      padding: 3px 10px;
+      border-radius: 999px;
+      margin-left: 8px;
+    }
+    .controls { display: flex; gap: 8px; }
+    .btn {
+      background: #334155;
+      color: white;
+      border: 1px solid #475569;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      cursor: pointer;
+      font-weight: 500;
+    }
+    .btn:hover { background: #475569; }
+    .btn-blue { background: #2563eb; border-color: #3b82f6; }
+    #viewport {
+      flex: 1;
+      position: relative;
+      overflow: hidden;
+      background-color: #f8fafc;
+      background-image: radial-gradient(#cbd5e1 1.2px, transparent 1.2px);
+      background-size: 24px 24px;
+    }
+    #diagram-wrapper {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    #loading {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: white;
+      padding: 16px 28px;
+      border-radius: 10px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+      font-weight: 500;
+      color: #475569;
+    }
+    .hint-bar {
+      position: absolute;
+      bottom: 14px;
+      left: 20px;
+      background: rgba(15, 23, 42, 0.8);
+      backdrop-filter: blur(8px);
+      color: #e2e8f0;
+      padding: 6px 14px;
+      border-radius: 6px;
+      font-size: 0.78rem;
+      pointer-events: none;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div style="display: flex; align-items: center;">
+      <h1>☕ ERD CHUỖI CAFE <span class="badge">BẢN SỐ CHUẨN 1 - N & N - N</span></h1>
+    </div>
+    <div class="controls">
+      <button class="btn" onclick="panZoom.zoomIn()">🔍 Phóng to</button>
+      <button class="btn" onclick="panZoom.zoomOut()">🔎 Thu nhỏ</button>
+      <button class="btn btn-blue" onclick="panZoom.resetZoom(); panZoom.fit(); panZoom.center();">🎯 Vừa màn hình</button>
+    </div>
+  </header>
+
+  <div id="viewport">
+    <div id="loading">⏳ Đang tải sơ đồ...</div>
+    <div id="diagram-wrapper">
+      <pre class="mermaid" id="mermaid-code">
+erDiagram
+    %% ==========================================
+    %% 1. ĐA CHI NHÁNH & PHÂN QUYỀN RBAC
+    %% ==========================================
+    CHINHANH ||--o{ NHANVIEN : "1 .. N (co_nhan_su)"
+    ROLES ||--o{ NHANVIEN : "1 .. N (vai_tro)"
+    NHANVIEN ||--o{ USER_BRANCH_MAPPINGS : "1 .. N (phan_quyen)"
+    CHINHANH ||--o{ USER_BRANCH_MAPPINGS : "1 .. N (chi_nhanh_quan_ly)"
+
+    %% ==========================================
+    %% 2. CHẤM CÔNG CLOUD & BẢNG LƯƠNG
+    %% ==========================================
+    CHINHANH ||--o{ THIETBI_CHAMCONG : "1 .. N (lap_dat)"
+    THIETBI_CHAMCONG ||--o{ CHAMCONG_RAWLOG : "1 .. N (day_log_5s)"
+    NHANVIEN ||--o{ CHAMCONG_RAWLOG : "1 .. N (quet_the_mat)"
+    CHINHANH ||--o{ CHAMCONG_RAWLOG : "1 .. N (tai_chi_nhanh)"
+    
+    CALAM ||--o{ CHAMCONG : "1 .. N (khung_gio)"
+    NHANVIEN ||--o{ CHAMCONG : "1 .. N (diem_danh)"
+    NHANVIEN ||--o{ BANGLUONG : "1 .. N (tinh_luong)"
+
+    %% ==========================================
+    %% 3. BÀN RIÊNG TỪNG CN, POS & BÁO CÁO DOANH THU
+    %% ==========================================
+    CHINHANH ||--o{ BAN : "1 .. N (ban_the_rieng_cn)"
+    BAN ||--o{ HOADON : "0..1 .. N (phuc_vu)"
+    NHANVIEN ||--o{ HOADON : "1 .. N (thu_ngan_xuat_bill)"
+    CHINHANH ||--o{ HOADON : "1 .. N (doanh_thu_rieng_cn)"
+
+    HOADON ||--|{ CHITIETHOADON : "1 .. N"
+    MON_SIZE ||--o{ CHITIETHOADON : "1 .. N (ban_ra)"
+
+    CHINHANH ||--o{ CHOTCA_KETTIEN : "1 .. N (z_report_ca)"
+    CHINHANH ||--o{ YEUCAU_HUY : "1 .. N (duyet_huy_mon)"
+
+    %% ==========================================
+    %% 4. MENU & ĐỊNH LƯỢNG (BOM)
+    %% ==========================================
+    DANHMUC ||--o{ MON : "1 .. N (phan_loai)"
+    MON ||--|{ MON_SIZE : "1 .. N"
+    KICHCO ||--|{ MON_SIZE : "1 .. N"
+
+    MON_SIZE ||--|{ CONGTHUC : "1 .. N"
+    NGUYENLIEU ||--o{ CONGTHUC : "1 .. N (dinh_luong_bom)"
+
+    %% ==========================================
+    %% 5. KHO & KIỂM KÊ HAO HỤT
+    %% ==========================================
+    CHINHANH ||--o{ TONKHO : "1 .. N (kho_chi_nhanh)"
+    NGUYENLIEU ||--o{ TONKHO : "1 .. N (ton_kho)"
+
+    CHINHANH ||--o{ PHIEUKHO : "1 .. N (phat_sinh)"
+    NHACUNGCAP ||--o{ PHIEUKHO : "0..1 .. N (cung_cap)"
+    NHANVIEN ||--o{ PHIEUKHO : "1 .. N (lap_phieu)"
+    PHIEUKHO ||--|{ CHITIETPHIEUKHO : "1 .. N"
+    NGUYENLIEU ||--o{ CHITIETPHIEUKHO : "1 .. N (vat_tu)"
+
+    CHINHANH ||--o{ KIEMKE_KHO : "1 .. N (kiem_ke_cuoi_ngay)"
+    NGUYENLIEU ||--o{ KIEMKE_KHO : "1 .. N (hao_hut)"
+
+    %% ==========================================
+    %% THỰC THỂ DỮ LIỆU CHI TIẾT
+    %% ==========================================
+    CHINHANH {
+        string MaCN PK
+        string TenCN
+        string DiaChi
+        string SDT
+    }
+
+    ROLES {
+        string RoleId PK
+        string RoleCode
+        string RoleName
+        string Description
+        int IsActive
+    }
+
+    NHANVIEN {
+        string MaNV PK
+        string TenNV
+        string SDT
+        string RoleCode FK
+        string ChucVu
+        float LuongTheoGio
+        string TenDangNhap
+        string MatKhau
+        string MaCN FK
+    }
+
+    USER_BRANCH_MAPPINGS {
+        int MappingId PK
+        string UserId FK
+        string BranchId FK
+        int IsDefault
+    }
+
+    THIETBI_CHAMCONG {
+        string MaTB PK
+        string TenTB
+        string MaCN FK
+        string SerialNumber
+        string IP_LAN
+        string Protocol
+        string TrangThai
+        string LastSync
+        int TongLog
+    }
+
+    CHAMCONG_RAWLOG {
+        string MaLog PK
+        string MaNV FK
+        string MaCN FK
+        string MaTB FK
+        string ThoiGian
+        string KieuQuet
+        string Status
+    }
+
+    CALAM {
+        string MaCa PK
+        string TenCa
+        string GioBatDau
+        string GioKetThuc
+    }
+
+    CHAMCONG {
+        int MaChamCong PK
+        string MaNV FK
+        string MaCa FK
+        string NgayLam
+        string GioVao
+        string GioRa
+        int DiTrePhut
+        int VeSomPhut
+        float SoGioThucTe
+        float LuongCa
+        string TrangThai
+    }
+
+    BANGLUONG {
+        string MaBangLuong PK
+        string MaNV FK
+        int Thang
+        int Nam
+        float TongGioLam
+        float LuongTheoGio
+        float PhuCap
+        float PhatDiTre
+        float ThucLinh
+        string TrangThai
+    }
+
+    BAN {
+        string MaBan PK
+        string SoBan
+        string KhuVuc
+        string MaCN FK
+        string TrangThai
+        int YeuCauThanhToan
+    }
+
+    HOADON {
+        string MaHD PK
+        string MaCN FK
+        string MaBan FK
+        string MaNV FK
+        string NgayLap
+        float TongTien
+        float GiamGia
+        float TongThanhToan
+        string HinhThucTT
+        string TrangThai
+    }
+
+    CHITIETHOADON {
+        int MaCTHD PK
+        string MaHD FK
+        string MaMonSize FK
+        int SoLuong
+        float DonGia
+        float ThanhTien
+    }
+
+    CHOTCA_KETTIEN {
+        string MaChotCa PK
+        string MaCN FK
+        string CaLam
+        string ThuNgan
+        float TienDauCa
+        float TienThuTrongCa
+        float ChiKhanCap
+        float TienLyThuyet
+        float TienThucDem
+        float ChenhLech
+        string ThoiGian
+    }
+
+    YEUCAU_HUY {
+        string MaYeuCau PK
+        string MaCN FK
+        string MaHD
+        string TenMon
+        float SoTien
+        string ThuNgan
+        string LyDo
+        string TrangThai
+    }
+
+    DANHMUC {
+        string MaDM PK
+        string TenDM
+    }
+
+    MON {
+        string MaMon PK
+        string TenMon
+        string MaDM FK
+        string HinhAnh
+        string TrangThai
+    }
+
+    KICHCO {
+        string MaSize PK
+        string TenSize
+    }
+
+    MON_SIZE {
+        string MaMonSize PK
+        string MaMon FK
+        string MaSize FK
+        float GiaBan
+    }
+
+    CONGTHUC {
+        int MaCongThuc PK
+        string MaMonSize FK
+        string MaNL FK
+        float SoLuongTieuHao
+    }
+
+    NGUYENLIEU {
+        string MaNL PK
+        string TenNL
+        string DonViTinh
+        float NguongBao
+    }
+
+    TONKHO {
+        int MaTonKho PK
+        string MaCN FK
+        string MaNL FK
+        float SoLuongTon
+    }
+
+    NHACUNGCAP {
+        string MaNCC PK
+        string TenNCC
+        string SDT
+    }
+
+    PHIEUKHO {
+        string MaPhieu PK
+        string LoaiPhieu
+        string MaCN FK
+        string MaNCC FK
+        string MaNV FK
+        string NgayLap
+        float TongTien
+    }
+
+    CHITIETPHIEUKHO {
+        string MaPhieu FK
+        string MaNL FK
+        float SoLuong
+        float DonGia
+    }
+
+    KIEMKE_KHO {
+        string MaKiemKe PK
+        string MaCN FK
+        string NgayKiemKe
+        string NguoiKiemKe
+        string MaNL FK
+        float TonMay
+        float TonThucTe
+        float ChenhLech
+        string LyDo
+    }
+      </pre>
+    </div>
+    <div class="hint-bar">💡 Giữ chuột trái để di chuyển | Lăn chuột để Zoom in/out</div>
+  </div>
+
+  <script>
+    let panZoom = null;
+    mermaid.initialize({
+      startOnLoad: false,
+      theme: 'default',
+      er: { useMaxWidth: false }
+    });
+
+    window.addEventListener('DOMContentLoaded', async () => {
+      await mermaid.run();
+      document.getElementById('loading').style.display = 'none';
+      const svg = document.querySelector('#diagram-wrapper svg');
+      if (svg) {
+        svg.style.width = '100%';
+        svg.style.height = '100%';
+        panZoom = svgPanZoom(svg, {
+          zoomEnabled: true,
+          controlIconsEnabled: false,
+          fit: true,
+          center: true,
+          minZoom: 0.2,
+          maxZoom: 10
+        });
+      }
+    });
+  </script>
+</body>
+</html>

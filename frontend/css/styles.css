@@ -1,0 +1,156 @@
+/* ==============================================================================
+   CUSTOM STYLES FOR COFFEE CHAIN POS SYSTEM
+   ============================================================================== */
+
+:root {
+  --primary: #2563eb;
+  --primary-hover: #1d4ed8;
+  --bg-main: #f8fafc;
+  --card-bg: #ffffff;
+  --border-color: #e2e8f0;
+}
+
+/* ==============================================================================
+   WCAG AA COMPLIANCE (MINIMUM 4.5:1 CONTRAST)
+   ============================================================================== */
+/* Đảm bảo độ tương phản của placeholder đạt chuẩn WCAG AA:
+   #475569 (slate-600) đạt tỉ lệ tương phản 7.01:1 trên nền trắng (#ffffff)
+   và 6.72:1 trên nền slate-50 (#f8fafc), vượt xa mức tối thiểu 4.5:1 */
+::placeholder {
+  color: #475569 !important;
+  opacity: 1 !important;
+}
+input::placeholder,
+textarea::placeholder,
+select::placeholder {
+  color: #475569 !important;
+  opacity: 1 !important;
+}
+
+/* Mã món (CF_DEN, CF_SUA, ...) độ tương phản cao >= 7.0:1 */
+.dish-code {
+  color: #334155 !important; /* slate-700: 9.37:1 trên nền trắng */
+  background-color: #f1f5f9; /* slate-100 */
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  user-select: none;
+}
+
+/* Scrollbar tinh gọn */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Card Món ăn */
+.menu-card {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.menu-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.08);
+}
+.menu-card:active {
+  transform: scale(0.97);
+}
+
+/* Bàn */
+.table-card {
+  transition: all 0.2s ease;
+}
+.table-card:hover {
+  transform: translateY(-2px);
+}
+.table-card.active {
+  border-color: #2563eb !important;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.25);
+}
+
+/* Hóa đơn dạng nhiệt K80 */
+.receipt-paper {
+  background: #fff;
+  border: 1px dashed #cbd5e1;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  font-family: 'Courier New', Courier, monospace;
+}
+
+/* Modal Animation */
+.modal-enter {
+  opacity: 0;
+  transform: scale(0.95);
+}
+.modal-enter-active {
+  opacity: 1;
+  transform: scale(1);
+  transition: all 0.2s ease-out;
+}
+
+/* Login Screen Background Pattern */
+.login-bg {
+  background-color: #0f172a;
+  background-image: radial-gradient(rgba(59, 130, 246, 0.15) 1px, transparent 1px);
+  background-size: 32px 32px;
+}
+
+/* Đảm bảo ẩn tab triệt để không bị class flex ghi đè */
+.tab-content.hidden {
+  display: none !important;
+}
+
+/* ==============================================================================
+   STANDOUT MODULE HEADER TITLE & CONTAINER (Chữ nổi, viền ngoài tối màu, đổ bóng nhẹ)
+   Đồng bộ tiêu đề chính cho các phân hệ Quản lý: Tài chính, Nhân sự, Thực đơn, Kho, Chi nhánh...
+   Đảm bảo không bị cắt xén (overflow-visible, line-height 1.4, padding-top/bottom đầy đủ)
+   ============================================================================== */
+.module-header-container {
+  padding-top: 8px !important;
+  overflow: visible !important;
+}
+
+.module-header-title,
+#view-finance h2,
+#view-hr h2,
+#view-menu h2,
+#view-inventory h2,
+#view-branches h2 {
+  color: #0f172a; /* slate-900 */
+  line-height: 1.4 !important;
+  padding-top: 4px;
+  padding-bottom: 2px;
+  margin-top: 1px;
+  overflow: visible !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.15), 0 0 1px rgba(15, 23, 42, 0.25);
+  -webkit-text-stroke: 0.25px rgba(15, 23, 42, 0.25);
+  letter-spacing: -0.025em;
+}
+
+/* ==============================================================================
+   SUBTABS NAVIGATION BAR (Tránh lẹm mép dưới nút tab & hiệu ứng hover/active)
+   Xóa height cố định, thêm padding-bottom 16px (10px-20px), min-height 52px
+   ============================================================================== */
+.subtabs-nav-bar,
+#hr-subtabs-nav,
+#menu-subtabs-nav,
+#finance-subtabs-nav,
+#inv-subtabs-nav {
+  height: auto !important;
+  min-height: 52px !important;
+  padding-top: 4px !important;
+  padding-bottom: 16px !important; /* 16px nằm trong khoảng 10px - 20px */
+  overflow-x: auto !important;
+  overflow-y: visible !important;
+  align-items: center;
+}
+

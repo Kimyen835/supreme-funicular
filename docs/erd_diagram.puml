@@ -1,0 +1,383 @@
+@startuml
+' ==============================================================================
+' SƠ ĐỒ THỰC THỂ LIÊN KẾT (ERD) - HỆ THỐNG QUẢN LÝ CHUỖI CÀ PHÊ
+' Kiến trúc Đa Chi Nhánh (Multi-Branch) + Phân Quyền RBAC 3 Vai Trò
+' Ký hiệu Crow's Foot (Chân quạ) chuẩn quốc tế + Bản số (1 - N, N - N)
+' ==============================================================================
+
+hide circle
+skinparam linetype ortho
+skinparam shadowing false
+skinparam roundcorner 6
+skinparam nodesep 50
+skinparam ranksep 60
+skinparam defaultFontName "Segoe UI"
+skinparam defaultFontSize 11
+
+skinparam package {
+  BorderThickness 2
+  FontSize 13
+  FontStyle bold
+}
+
+skinparam entity {
+  BackgroundColor #FFFFFF
+  BorderThickness 1.2
+}
+
+' ========================================================
+' CỤM 1: ĐA CHI NHÁNH & PHÂN QUYỀN (MULTI-BRANCH & RBAC)
+' ========================================================
+package "1. ĐA CHI NHÁNH & PHÂN QUYỀN (RBAC)" #EFF6FF {
+  skinparam entityBorderColor #2563EB
+  skinparam entityHeaderBackgroundColor #DBEAFE
+  skinparam ArrowColor #1D4ED8
+
+  entity "CHINHANH" as CHINHANH {
+    * MaCN : varchar(20) <<PK>>
+    --
+    TenCN : nvarchar(100)
+    DiaChi : nvarchar(255)
+    SDT : varchar(20)
+  }
+
+  entity "ROLES" as ROLES {
+    * RoleId : varchar(20) <<PK>>
+    --
+    RoleCode : varchar(50) <<Unique>> ' SUPER_ADMIN, BRANCH_MANAGER, CASHIER
+    RoleName : nvarchar(100)
+    Description : nvarchar(255)
+    IsActive : int
+  }
+
+  entity "NHANVIEN" as NHANVIEN {
+    * MaNV : varchar(20) <<PK>>
+    --
+    TenNV : nvarchar(100)
+    SDT : varchar(20)
+    RoleCode : varchar(50) <<FK>>
+    ChucVu : nvarchar(50)
+    LuongTheoGio : float
+    TenDangNhap : varchar(50) <<Unique>>
+    MatKhau : varchar(255)
+    MaCN : varchar(20) <<FK>> ' Chi nhánh gốc
+  }
+
+  entity "USER_BRANCH_MAPPINGS" as USER_BRANCH_MAPPINGS {
+    * MappingId : int <<PK, autoincrement>>
+    --
+    UserId : varchar(20) <<FK>>
+    BranchId : varchar(20) <<FK>>
+    IsDefault : int
+  }
+}
+
+' ========================================================
+' CỤM 2: MÁY CHẤM CÔNG CLOUD, CA LÀM & BẢNG LƯƠNG
+' ========================================================
+package "2. CHẤM CÔNG CLOUD & BẢNG LƯƠNG" #F3E8FF {
+  skinparam entityBorderColor #7C3AED
+  skinparam entityHeaderBackgroundColor #EDE9FE
+  skinparam ArrowColor #6D28D9
+
+  entity "THIETBI_CHAMCONG" as THIETBI_CHAMCONG {
+    * MaTB : varchar(20) <<PK>>
+    --
+    TenTB : nvarchar(100)
+    MaCN : varchar(20) <<FK>>
+    SerialNumber : varchar(50) <<Unique>>
+    IP_LAN : varchar(30)
+    Protocol : varchar(50) ' ADMS / Push Port 8000
+    TrangThai : varchar(20) ' Online / Offline
+    LastSync : varchar(30)
+    TongLog : int
+  }
+
+  entity "CHAMCONG_RAWLOG" as CHAMCONG_RAWLOG {
+    * MaLog : varchar(30) <<PK>>
+    --
+    MaNV : varchar(20) <<FK>>
+    MaCN : varchar(20) <<FK>>
+    MaTB : varchar(20) <<FK>>
+    ThoiGian : varchar(30)
+    KieuQuet : varchar(20) ' Check-in / Check-out
+    Status : nvarchar(100)
+  }
+
+  entity "CALAM" as CALAM {
+    * MaCa : varchar(20) <<PK>>
+    --
+    TenCa : nvarchar(50)
+    GioBatDau : varchar(10)
+    GioKetThuc : varchar(10)
+  }
+
+  entity "CHAMCONG" as CHAMCONG {
+    * MaChamCong : int <<PK, autoincrement>>
+    --
+    MaNV : varchar(20) <<FK>>
+    MaCa : varchar(20) <<FK>>
+    NgayLam : varchar(15)
+    GioVao : varchar(15)
+    GioRa : varchar(15)
+    DiTrePhut : int
+    VeSomPhut : int
+    SoGioThucTe : float
+    LuongCa : float
+    TrangThai : nvarchar(50)
+  }
+
+  entity "BANGLUONG" as BANGLUONG {
+    * MaBangLuong : varchar(30) <<PK>>
+    --
+    MaNV : varchar(20) <<FK>>
+    Thang : int
+    Nam : int
+    TongGioLam : float
+    LuongTheoGio : float
+    PhuCap : float
+    PhatDiTre : float
+    ThuongPhat : float
+    ThucLinh : float
+    TrangThai : nvarchar(50)
+  }
+}
+
+' ========================================================
+' CỤM 3: MENU & ĐỊNH LƯỢNG NGUYÊN LIỆU (BOM)
+' ========================================================
+package "3. MENU & ĐỊNH LƯỢNG (BOM)" #F0FDF4 {
+  skinparam entityBorderColor #16A34A
+  skinparam entityHeaderBackgroundColor #DCFCE7
+  skinparam ArrowColor #15803D
+
+  entity "DANHMUC" as DANHMUC {
+    * MaDM : varchar(20) <<PK>>
+    --
+    TenDM : nvarchar(100)
+  }
+
+  entity "MON" as MON {
+    * MaMon : varchar(20) <<PK>>
+    --
+    TenMon : nvarchar(100)
+    MaDM : varchar(20) <<FK>>
+    HinhAnh : varchar(10)
+    TrangThai : varchar(20)
+  }
+
+  entity "KICHCO" as KICHCO {
+    * MaSize : varchar(10) <<PK>>
+    --
+    TenSize : nvarchar(50)
+  }
+
+  entity "MON_SIZE" as MON_SIZE {
+    * MaMonSize : varchar(30) <<PK>>
+    --
+    MaMon : varchar(20) <<FK>>
+    MaSize : varchar(10) <<FK>>
+    GiaBan : float
+  }
+
+  entity "CONGTHUC" as CONGTHUC {
+    * MaCongThuc : int <<PK, autoincrement>>
+    --
+    MaMonSize : varchar(30) <<FK>>
+    MaNL : varchar(20) <<FK>>
+    SoLuongTieuHao : float
+  }
+
+  entity "NGUYENLIEU" as NGUYENLIEU {
+    * MaNL : varchar(20) <<PK>>
+    --
+    TenNL : nvarchar(100)
+    DonViTinh : nvarchar(20)
+    NguongBao : float
+  }
+}
+
+' ========================================================
+' CỤM 4: BÁN HÀNG POS, SƠ ĐỒ BÀN & BÁO CÁO DOANH THU
+' ========================================================
+package "4. POS BÁN HÀNG & BÁO CÁO DOANH THU" #FEFCE8 {
+  skinparam entityBorderColor #CA8A04
+  skinparam entityHeaderBackgroundColor #FEF9C3
+  skinparam ArrowColor #A16207
+
+  entity "BAN" as BAN {
+    * MaBan : varchar(20) <<PK>>
+    --
+    SoBan : nvarchar(50) ' Thẻ 01 - Thẻ 06
+    KhuVuc : nvarchar(100) ' Tầng 1 Máy Lạnh / Tầng 2 Sân Thượng
+    MaCN : varchar(20) <<FK>> ' Phân bổ bàn theo từng CN (CN01, CN02)
+    TrangThai : varchar(20) ' Trong / CoKhach
+    YeuCauThanhToan : int ' 0: Bình thường, 1: Chuông gọi tính tiền
+  }
+
+  entity "HOADON" as HOADON {
+    * MaHD : varchar(30) <<PK>>
+    --
+    MaCN : varchar(20) <<FK>> ' Tách biệt doanh thu theo từng chi nhánh
+    MaBan : varchar(20) <<FK, null>> ' Bàn hoặc Mang về (Takeaway)
+    MaNV : varchar(20) <<FK>> ' Thu ngân lập hóa đơn
+    NgayLap : varchar(25)
+    TongTien : float
+    GiamGia : float
+    TongThanhToan : float
+    KhachTra : float
+    HinhThucTT : varchar(30) ' TienMat, ChuyenKhoan, The
+    TrangThai : varchar(30) ' HoanThanh
+  }
+
+  entity "CHITIETHOADON" as CHITIETHOADON {
+    * MaCTHD : int <<PK, autoincrement>>
+    --
+    MaHD : varchar(30) <<FK>>
+    MaMonSize : varchar(30) <<FK>>
+    SoLuong : int
+    DonGia : float
+    ThanhTien : float
+  }
+
+  entity "CHOTCA_KETTIEN" as CHOTCA_KETTIEN {
+    * MaChotCa : varchar(30) <<PK>>
+    --
+    MaCN : varchar(20) <<FK>>
+    CaLam : nvarchar(50)
+    ThuNgan : nvarchar(100)
+    TienDauCa : float
+    TienThuTrongCa : float
+    ChiKhanCap : float
+    TienLyThuyet : float
+    TienThucDem : float
+    ChenhLech : float
+    ThoiGian : varchar(30)
+    GhiChu : nvarchar(255)
+  }
+
+  entity "YEUCAU_HUY" as YEUCAU_HUY {
+    * MaYeuCau : varchar(30) <<PK>>
+    --
+    MaCN : varchar(20) <<FK>>
+    MaHD : varchar(30)
+    TenMon : nvarchar(100)
+    SoTien : float
+    ThuNgan : nvarchar(100)
+    LyDo : nvarchar(255)
+    ThoiGian : varchar(30)
+    TrangThai : varchar(30) ' ChoDuyet, DaDuyet, TuChoi
+  }
+}
+
+' ========================================================
+' CỤM 5: QUẢN LÝ TỒN KHO & KIỂM KÊ HAO HỤT
+' ========================================================
+package "5. KHO & KIỂM KÊ HAO HỤT" #FFF1F2 {
+  skinparam entityBorderColor #E11D48
+  skinparam entityHeaderBackgroundColor #FFE4E6
+  skinparam ArrowColor #BE123C
+
+  entity "TONKHO" as TONKHO {
+    * MaTonKho : int <<PK, autoincrement>>
+    --
+    MaCN : varchar(20) <<FK>>
+    MaNL : varchar(20) <<FK>>
+    SoLuongTon : float
+  }
+
+  entity "NHACUNGCAP" as NHACUNGCAP {
+    * MaNCC : varchar(20) <<PK>>
+    --
+    TenNCC : nvarchar(150)
+    SDT : varchar(20)
+  }
+
+  entity "PHIEUKHO" as PHIEUKHO {
+    * MaPhieu : varchar(30) <<PK>>
+    --
+    LoaiPhieu : varchar(20) ' NHAP, XUAT_HUY, DIEU_CHUYEN
+    MaCN : varchar(20) <<FK>>
+    MaNCC : varchar(20) <<FK, null>>
+    MaNV : varchar(20) <<FK>>
+    NgayLap : varchar(30)
+    TongTien : float
+  }
+
+  entity "CHITIETPHIEUKHO" as CHITIETPHIEUKHO {
+    * MaPhieu : varchar(30) <<FK>>
+    * MaNL : varchar(20) <<FK>>
+    --
+    SoLuong : float
+    DonGia : float
+  }
+
+  entity "KIEMKE_KHO" as KIEMKE_KHO {
+    * MaKiemKe : varchar(30) <<PK>>
+    --
+    MaCN : varchar(20) <<FK>>
+    NgayKiemKe : varchar(20)
+    NguoiKiemKe : nvarchar(100)
+    MaNL : varchar(20) <<FK>>
+    TonMay : float
+    TonThucTe : float
+    ChenhLech : float
+    LyDo : nvarchar(255)
+  }
+}
+
+' ==============================================================================
+' QUAN HỆ BẢN SỐ (CARDINALITY: 1 - N, 1 - 1, N - N)
+' ==============================================================================
+
+' --- 1. PHÂN QUYỀN ĐA CHI NHÁNH & NHÂN VIÊN ---
+CHINHANH "1" ||--o{ "N" NHANVIEN : "chi nhánh gốc"
+ROLES "1" ||--o{ "N" NHANVIEN : "gán vai trò (RBAC)"
+NHANVIEN "1" ||--o{ "N" USER_BRANCH_MAPPINGS : "phân quyền chi nhánh"
+CHINHANH "1" ||--o{ "N" USER_BRANCH_MAPPINGS : "chi nhánh phụ trách"
+
+' --- 2. CHẤM CÔNG & LƯƠNG ---
+CHINHANH "1" ||--o{ "N" THIETBI_CHAMCONG : "lắp đặt"
+THIETBI_CHAMCONG "1" ||--o{ "N" CHAMCONG_RAWLOG : "đẩy log quẹt"
+NHANVIEN "1" ||--o{ "N" CHAMCONG_RAWLOG : "quẹt vân tay/face"
+CHINHANH "1" ||--o{ "N" CHAMCONG_RAWLOG : "ghi nhận tại CN"
+
+CALAM "1" ||--o{ "N" CHAMCONG : "khung giờ chuẩn"
+NHANVIEN "1" ||--o{ "N" CHAMCONG : "chấm công ca"
+NHANVIEN "1" ||--o{ "N" BANGLUONG : "lĩnh lương tháng"
+
+' --- 3. MENU, SIZE & CÔNG THỨC (BOM) ---
+DANHMUC "1" ||--o{ "N" MON : "phân loại danh mục"
+MON "1" ||--|{ "N" MON_SIZE : "các kích cỡ"
+KICHCO "1" ||--o{ "N" MON_SIZE : "quy định size"
+
+MON_SIZE "1" ||--|{ "N" CONGTHUC : "định lượng tiêu hao"
+NGUYENLIEU "1" ||--o{ "N" CONGTHUC : "thành phần BOM (N - N)"
+
+' --- 4. BÀN, BÁN HÀNG POS & BÁO CÁO DOANH THU ---
+CHINHANH "1" ||--o{ "N" BAN : "sở hữu độc lập bàn/thẻ"
+BAN "0..1" ||--o{ "N" HOADON : "phục vụ tại bàn"
+NHANVIEN "1" ||--o{ "N" HOADON : "thu ngân lập hóa đơn"
+CHINHANH "1" ||--o{ "N" HOADON : "tổng hợp doanh thu CN"
+
+HOADON "1" ||--|{ "N" CHITIETHOADON : "chứa các món"
+MON_SIZE "1" ||--o{ "N" CHITIETHOADON : "bán ra (N - N)"
+
+CHINHANH "1" ||--o{ "N" CHOTCA_KETTIEN : "báo cáo Z-Report ca"
+CHINHANH "1" ||--o{ "N" YEUCAU_HUY : "duyệt hủy món/bill"
+
+' --- 5. TỒN KHO & KIỂM KÊ ---
+CHINHANH "1" ||--o{ "N" TONKHO : "tồn kho chi nhánh"
+NGUYENLIEU "1" ||--o{ "N" TONKHO : "nguyên vật liệu tồn (N - N)"
+
+CHINHANH "1" ||--o{ "N" PHIEUKHO : "phát sinh giao dịch kho"
+NHACUNGCAP "0..1" ||--o{ "N" PHIEUKHO : "nhà cung cấp giao hàng"
+NHANVIEN "1" ||--o{ "N" PHIEUKHO : "thủ kho/quản lý lập phiếu"
+
+PHIEUKHO "1" ||--|{ "N" CHITIETPHIEUKHO : "chi tiết dòng vật tư"
+NGUYENLIEU "1" ||--o{ "N" CHITIETPHIEUKHO : "nguyên liệu xuất nhập (N - N)"
+
+CHINHANH "1" ||--o{ "N" KIEMKE_KHO : "kiểm kê cuối ngày CN"
+NGUYENLIEU "1" ||--o{ "N" KIEMKE_KHO : "đối soát tồn máy/thực"
+
+@enduml
